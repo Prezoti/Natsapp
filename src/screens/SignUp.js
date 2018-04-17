@@ -1,0 +1,120 @@
+import React, { Component } from 'react';
+import { View, Text, StyleSheet, ImageBackground, StatusBar, TextInput, TouchableHighlight, Keyboard } from 'react-native';
+import { connect } from 'react-redux';
+import { checkLogin, changeEmail, changePassword, changeName, SignUpAction } from '../actions/AuthActions';
+
+export class SignUp extends Component {
+
+	static navigationOptions = {
+		title:'Cadastrar'
+	}
+
+	constructor(props) {
+		super(props);
+		this.state = {};
+	}
+
+	componentDidUpdate() {
+		if(this.props.status == 1) {
+			Keyboard.dismiss();
+			this.props.navigation.navigate('Conversas');
+		}
+	}	
+
+	render() {
+		return (
+			<ImageBackground source={require('../../assets/images/fundo.jpg')} style={styles.bg} >
+				<StatusBar barStyle={'dark-content'} backgroundColor={'transparent'} hidden={false} />
+				<View style={styles.container}>
+					<View style={styles.textArea} >
+
+						<Text style={styles.texto} >Digite seu nome</Text>
+						<TextInput style={styles.input} value={this.props.name} onChangeText={this.props.changeName} />
+
+						<Text style={styles.texto} >Digite seu e-mail</Text>
+						<TextInput style={styles.input} value={this.props.email} onChangeText={this.props.changeEmail} />
+
+						<Text style={styles.texto} >Digite sua senha</Text>
+						<TextInput secureTextEntry={true} style={styles.input} value={this.props.password} onChangeText={this.props.changePassword} />	
+
+						<View style={styles.buttonArea}>
+							<TouchableHighlight underlayColor='#CCCCCC' style={styles.button} onPress={()=>{
+								this.props.SignUpAction(this.props.name, this.props.email, this.props.password)
+							}}>
+								<Text style={styles.btnTxext}>Cadastrar</Text>
+							</TouchableHighlight>
+						</View>											
+					</View>
+				</View>
+			</ImageBackground>
+		);
+	}
+}
+
+const styles = StyleSheet.create({
+	bg:{
+		flex:1,
+		width:null
+	},	
+	container:{
+		flex:1,
+		justifyContent:'center',
+		alignItems:'center'
+	},
+	textArea:{
+		width:300,
+		height:265,
+		backgroundColor:'rgba(255,255,255,0.7)',
+		borderWidth:1,
+		borderRadius:10,
+		padding:10	
+	},
+	texto:{
+		color:'#000000',
+		fontWeight:'bold',
+		marginBottom:2,
+		marginTop:5,
+		marginLeft:12
+	},
+	input:{
+		height:35,
+		backgroundColor:'#EEEEEE',
+		marginLeft:10,
+		marginRight:10,
+		borderRadius:10,
+		borderWidth:1,
+		paddingLeft:5,
+		paddingRight:5	
+	},
+	buttonArea:{
+		flex:1,
+		justifyContent:'center',
+		alignItems:'center'
+	},
+	button:{
+		backgroundColor:'#EEEEEE',
+		marginTop:10,
+		height:34,
+		width:100,
+		justifyContent:'center',
+		borderWidth:1,
+		borderRadius:17
+	},
+	btnTxext:{
+		color:'#000000',
+		textAlign:'center',
+		fontWeight:'bold'
+	}		
+});
+
+const mapStateToProps = (state) => {
+	return {
+		name:state.auth.name,
+		email:state.auth.email,
+		password:state.auth.password,
+		status:state.auth.status
+	};
+};
+
+const SignUpConnect = connect(mapStateToProps, { checkLogin, changeEmail, changePassword, changeName, SignUpAction })(SignUp);
+export default SignUpConnect;

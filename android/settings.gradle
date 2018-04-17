@@ -1,0 +1,3 @@
+rootProject.name = 'Natsapp'
+
+include ':app'
