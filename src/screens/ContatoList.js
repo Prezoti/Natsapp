@@ -28,7 +28,7 @@ export class ContatoList extends Component {
 
 	render() {
 		return (
-			<ImageBackground opacity={0.1} source={require('../../assets/images/fundo.jpg')} style={styles.bg} >
+			<ImageBackground opacity={0.1} source={require('../assets/images/fundo.jpg')} style={styles.bg} >
 				<View style={styles.container}>
 					<FlatList
 						data={this.props.contacts}

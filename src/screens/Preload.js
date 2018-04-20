@@ -18,6 +18,8 @@ export class Preload extends Component {
 		this.directPages = this.directPages.bind(this);
 
 		this.props.checkLogin();
+
+		window.globalNavigator = this.props.navigation;
 	}
 
 	directPages() {
@@ -57,7 +59,7 @@ export class Preload extends Component {
 
 	render() {
 		return (
-			<ImageBackground source={require('../../assets/images/fundo.jpg')} style={styles.bg} >
+			<ImageBackground source={require('../assets/images/fundo.jpg')} style={styles.bg} >
 				<View style={styles.container}>
 					<Text style={styles.texto} >Carregando... {this.props.status}</Text>
 				</View>

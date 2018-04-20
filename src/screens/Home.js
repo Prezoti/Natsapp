@@ -29,7 +29,7 @@ export class Home extends Component {
 
 	render() {
 		return (
-			<ImageBackground source={require('../../assets/images/fundo.jpg')} style={styles.bg} >
+			<ImageBackground source={require('../assets/images/fundo.jpg')} style={styles.bg} >
 				<StatusBar barStyle={'dark-content'} backgroundColor={'transparent'} hidden={false} />
 				<View style={styles.container}>
 					<Text style={styles.texto1} >NatsApp</Text>

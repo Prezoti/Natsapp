@@ -1,35 +1,45 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Button } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, FlatList } from 'react-native';
 import { connect } from 'react-redux';
+import { getChatList, setActiveChat } from '../actions/ChatActions';
+import ConversasItem from '../components/ConversasList/ConversasItem';
 
 export class ConversasList extends Component {
 
 	static navigationOptions = {
-		title:'',
-		tabBarLabel:'Conversas',
-		header:null
+		title:'Conversas',
+		tabBarLabel:'Conversas'
 	}
 
 	constructor(props) {
 		super(props);
 		this.state = {};
+
+		this.conversasClick = this.conversasClick.bind(this);
+
+		this.props.getChatList( this.props.uid );
 	}
 
 	componentDidUpdate() {
-		alert('Entrou no update');
-		if(this.props.activeChat != '') {
-			this.props.navigation.navigate('ConversaInterna');
-		}		
+		if(this.props.chatAtivo != '') {
+			//alert('Entrou no update');
+			this.props.navigation.navigate('ConversaInterna', {title:this.props.tituloChatAtivo});
+		}
+	}
+
+	conversasClick(data) {
+		//alert("Clicou em "+data.key);
+		this.props.setActiveChat(data.key);
 	}
 
 	render() {
 		return (
-			<ImageBackground opacity={0.1} source={require('../../assets/images/fundo.jpg')} style={styles.bg} >
+			<ImageBackground opacity={0.1} source={require('../assets/images/fundo.jpg')} style={styles.bg} >
 				<View style={styles.container}>
-					<Text>PAGINA CONVERSAS... {this.props.status} - {this.props.uid} </Text>
-					<Button title="Ir para Interna" onPress={()=>{
-						this.props.navigation.navigate('ConversaInterna');
-					}} />
+					<FlatList 
+					data={this.props.chats}
+					renderItem={({item})=> <ConversasItem data={item} onPress={this.conversasClick} /> }
+					/>
 				</View>
 			</ImageBackground>
 		);
@@ -43,6 +53,8 @@ const styles = StyleSheet.create({
 		width:null
 	},	
 	container:{
+		flex:1,
+		alignItems:'center',
 		margin:10
 	}
 });
@@ -51,11 +63,13 @@ const mapStateToProps = (state) => {
 	return {
 		status:state.auth.status,
 		uid:state.auth.uid,
-		activeChat:state.chat.ActiveChat
+		chatAtivo:state.chat.chatAtivo,
+		tituloChatAtivo:state.chat.tituloChatAtivo,
+		chats: state.chat.chats
 	};
 };
 
-const ConversasListConnect = connect(mapStateToProps, { })(ConversasList);
+const ConversasListConnect = connect(mapStateToProps, { getChatList, setActiveChat })(ConversasList);
 export default ConversasListConnect;
 
 

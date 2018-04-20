@@ -21,18 +21,25 @@ export class Config extends Component {
 
 	sair() {
 		this.props.SignOut();
-		
+
+		window.globalNavigator.navigate('Home');
+
+		/*
+		// a linha acima substituiu o bloco abaixo
+		// pois houve reestruturação dos navigatios que fez 
+		// haver mudancas de niveis ai foi criado uma navegacao global com window
 		this.props.navigation.dispatch(NavigationActions.reset({
 			index:0,
 			actions:[
 				NavigationActions.navigate({routeName:'Home'}) //Home
 			]
 		}));
+		*/
 	}
 
 	render() {
 		return (
-			<ImageBackground opacity={0.1} source={require('../../assets/images/fundo.jpg')} style={styles.bg} >
+			<ImageBackground opacity={0.1} source={require('../assets/images/fundo.jpg')} style={styles.bg} >
 				<View style={styles.container}>
 					<Text>PAGINA CONFIG...</Text>
 

@@ -1,5 +1,27 @@
 import firebase from '../FirebaseConnection';
 
+export const getChatList = ( userUid ) => {
+	return (dispatch) => {
+		firebase.database().ref('users').child(userUid).child('chats').on('value', (snapshot) => {
+			let chats = [];
+			snapshot.forEach((childItem)=> {
+				chats.push({
+					key: childItem.key,
+					title: childItem.val().title
+				});
+			});
+
+			dispatch({
+				type: 'setChatList',
+				payload: {
+					chats: chats
+				}
+			});
+
+		});
+	};
+};
+
 export const getContactList = ( userUid ) => {
 	return (dispatch) => {
 		firebase.database().ref('users').orderByChild('name').once('value').then((snapshot)=>{
@@ -38,20 +60,87 @@ export const createChat = ( userUid1, userUid2 ) => {
 		// Associando aos envolvidos
 		let chatId = newChat.key;
 
-		firebase.database().ref('users').child(userUid1).child('chats').child(chatId).set({
-			id:chatId
-		});	
-		firebase.database().ref('users').child(userUid2).child('chats').child(chatId).set({
-			id:chatId
+		firebase.database().ref('users').child(userUid2).once('value').then((snapshot) => {
+			firebase.database().ref('users').child(userUid1).child('chats').child(chatId).set({ 
+				id: chatId,
+				title: snapshot.val().name // nome do userUid2
+			});
 		});
-
-		dispatch({
-			type:'setActiveChat',
-			payload:{
-				chatid:chatId
-			}
+		
+		firebase.database().ref('users').child(userUid1).once('value').then((snapshot)=> {
+			firebase.database().ref('users').child(userUid2).child('chats').child(chatId).set({ 
+				id: chatId,
+				title: snapshot.val().name // nome do userUid1
+			}).then(()=>{
+				dispatch({
+					type:'setActiveChat',
+					payload:{
+						chatid:chatId
+					}
+				});				
+			});
 		});
 	};
 };
 
+export const setActiveChat = (chatId) => {
+	return ({
+		type: 'setActiveChat',
+		payload: {
+			chatid: chatId
+		}
+	});
+};
 
+export const sendMessage = ( txt, author, chatAtivo ) => {
+	return (dispatch) => {
+
+		let currentDate = '';
+		let cDate = new Date();
+		let ano = cDate.getFullYear();
+		let mes = cDate.getMonth()+1; if((mes/10)<1) {mes='0'+mes;}
+		let dia = cDate.getDate(); if((dia/10)<1) {dia='0'+dia;}
+		let hora = cDate.getHours(); if((hora/10)<1) {hora='0'+hora;}
+		let minuto = cDate.getMinutes(); if((minuto/10)<1) {minuto='0'+minuto;}
+		let segundo = cDate.getSeconds(); if((segundo/10)<1) {segundo='0'+segundo;}
+		currentDate = ano+'-'+mes+'-'+dia+' '+hora+':'+minuto+':'+segundo;
+
+		let msgId = firebase.database().ref('chats').child(chatAtivo).child('messages').push();
+
+		msgId.set({
+			date:currentDate,
+			m:txt,
+			uid:author
+		});
+	};
+};
+
+export const monitorChat = ( chatAtivo ) => {
+	return(dispatch) => {
+		firebase.database().ref('chats').child(chatAtivo).child('messages').orderByChild('date').on('value', (snapshot)=>{
+			let arrayMsg = [];
+
+			snapshot.forEach((childItem)=>{
+				arrayMsg.push({
+					key:childItem.key,
+					date:childItem.val().date,
+					m:childItem.val().m,
+					uid:childItem.val().uid
+				});
+			});
+
+			dispatch({
+				type:'setActiveChatMessage',
+				payload:{
+					'msgs':arrayMsg
+				}
+			});
+		});
+	};
+};
+
+export const monitorChatOff = ( chatAtivo ) => {
+	return(dispatch) => {
+		firebase.database().ref('chats').child(chatAtivo).child('messages').off();
+	};	
+};
