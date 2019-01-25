@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, ImageBackground } from 'react-native';
-import { NavigationActions } from 'react-navigation';
+import { View, Text, StyleSheet, ImageBackground, Image } from 'react-native';
+import { NavigationActions, StackActions } from 'react-navigation';
 import { connect } from 'react-redux';
 import { checkLogin } from '../actions/AuthActions';
 
@@ -27,7 +27,7 @@ export class Preload extends Component {
 		switch(this.props.status) {
 			case 1:
 
-				this.props.navigation.dispatch(NavigationActions.reset({
+				this.props.navigation.dispatch(StackActions.reset({
 					index:0,
 					actions:[
 						NavigationActions.navigate({routeName:'Conversas'})
@@ -37,7 +37,7 @@ export class Preload extends Component {
 				break;
 			case 2:
 
-				this.props.navigation.dispatch(NavigationActions.reset({
+				this.props.navigation.dispatch(StackActions.reset({
 					index:0,
 					actions:[
 						NavigationActions.navigate({routeName:'Home'})
@@ -61,7 +61,9 @@ export class Preload extends Component {
 		return (
 			<ImageBackground source={require('../assets/images/fundo.jpg')} style={styles.bg} >
 				<View style={styles.container}>
-					<Text style={styles.texto} >Carregando... {this.props.status}</Text>
+					<Image source={require('../assets/images/logo.png')} style={styles.logo} />
+					<Text style={styles.appname} >NatsApp</Text>
+					<Text style={styles.texto} >Carregando...</Text>
 				</View>
 			</ImageBackground>
 		);
@@ -75,10 +77,24 @@ const styles = StyleSheet.create({
 		width:null
 	},	
 	container:{
-		margin:10
+		flex:1,
+		justifyContent:'center',
+		alignItems:'center'
 	},
 	texto:{
 		fontSize:20,
+		fontWeight:'bold'
+	},
+	logo:{
+		width:54,
+		height:73,
+		marginBottom:20,
+		opacity:0.9
+	},
+	appname:{
+		fontSize:30,
+		marginBottom:20,
+		color:'#000000',
 		fontWeight:'bold'
 	}
 });

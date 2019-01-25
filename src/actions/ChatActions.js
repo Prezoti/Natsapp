@@ -1,15 +1,18 @@
 import firebase from '../FirebaseConnection';
 
-export const getChatList = ( userUid ) => {
+export const getChatList = ( userUid, callback ) => {
 	return (dispatch) => {
 		firebase.database().ref('users').child(userUid).child('chats').on('value', (snapshot) => {
 			let chats = [];
 			snapshot.forEach((childItem)=> {
 				chats.push({
 					key: childItem.key,
-					title: childItem.val().title
+					title: childItem.val().title,
+					other: childItem.val().other
 				});
 			});
+
+			callback();
 
 			dispatch({
 				type: 'setChatList',
@@ -22,7 +25,7 @@ export const getChatList = ( userUid ) => {
 	};
 };
 
-export const getContactList = ( userUid ) => {
+export const getContactList = ( userUid, callback ) => {
 	return (dispatch) => {
 		firebase.database().ref('users').orderByChild('name').once('value').then((snapshot)=>{
 			let users = [];
@@ -34,6 +37,8 @@ export const getContactList = ( userUid ) => {
 					});
 				}
 			});
+
+			callback();
 
 			dispatch({
 				type:'setContactList', 
@@ -63,14 +68,16 @@ export const createChat = ( userUid1, userUid2 ) => {
 		firebase.database().ref('users').child(userUid2).once('value').then((snapshot) => {
 			firebase.database().ref('users').child(userUid1).child('chats').child(chatId).set({ 
 				id: chatId,
-				title: snapshot.val().name // nome do userUid2
+				title: snapshot.val().name, // nome do userUid2
+				other: userUid2
 			});
 		});
 		
 		firebase.database().ref('users').child(userUid1).once('value').then((snapshot)=> {
 			firebase.database().ref('users').child(userUid2).child('chats').child(chatId).set({ 
 				id: chatId,
-				title: snapshot.val().name // nome do userUid1
+				title: snapshot.val().name, // nome do userUid1
+				other: userUid1
 			}).then(()=>{
 				dispatch({
 					type:'setActiveChat',
@@ -83,6 +90,17 @@ export const createChat = ( userUid1, userUid2 ) => {
 	};
 };
 
+export const redirectChat = (chatId) => {
+	return (dispatch) => {
+		dispatch({
+			type:'setActiveChat',
+			payload:{
+				chatid:chatId
+			}
+		});	
+	};
+}
+
 export const setActiveChat = (chatId) => {
 	return ({
 		type: 'setActiveChat',
@@ -92,7 +110,27 @@ export const setActiveChat = (chatId) => {
 	});
 };
 
-export const sendMessage = ( txt, author, chatAtivo ) => {
+export const sendImage = (blob, progressCallbak, successcallback) => {
+	return (dispatch) => {
+		let tmpKey = firebase.database().ref('chats').push().key;
+		let fbimage = firebase.storage().ref().child('images').child(tmpKey);
+		fbimage.put(blob, {contentType:'image/jpeg'})
+			.on('state_changed', 
+			progressCallbak,
+			(error)=>{
+				alert(error.code)
+			},
+			()=>{
+				fbimage.getDownloadURL().then((url)=>{
+					successcallback(url);
+				});
+			}
+		)
+	}
+};
+
+
+export const sendMessage = ( msgType, msgContent, author, chatAtivo ) => {
 	return (dispatch) => {
 
 		let currentDate = '';
@@ -107,26 +145,57 @@ export const sendMessage = ( txt, author, chatAtivo ) => {
 
 		let msgId = firebase.database().ref('chats').child(chatAtivo).child('messages').push();
 
-		msgId.set({
-			date:currentDate,
-			m:txt,
-			uid:author
-		});
+		switch(msgType) {
+			case 'text':
+				msgId.set({
+					msgType:'text',
+					date:currentDate,
+					m:msgContent,
+					uid:author
+				});
+				break;
+			case 'image':
+				msgId.set({
+					msgType:'image',
+					date:currentDate,
+					imgSource:msgContent,
+					uid:author
+				});
+				break;
+		}
 	};
 };
 
+// recebimento das mensagens
 export const monitorChat = ( chatAtivo ) => {
 	return(dispatch) => {
 		firebase.database().ref('chats').child(chatAtivo).child('messages').orderByChild('date').on('value', (snapshot)=>{
 			let arrayMsg = [];
 
 			snapshot.forEach((childItem)=>{
-				arrayMsg.push({
-					key:childItem.key,
-					date:childItem.val().date,
-					m:childItem.val().m,
-					uid:childItem.val().uid
-				});
+
+				switch(childItem.val().msgType) {
+					case 'text':
+						arrayMsg.push({
+							key:childItem.key,
+							date:childItem.val().date,
+							msgType:'text',
+							m:childItem.val().m,
+							uid:childItem.val().uid
+						});
+						break;
+					case 'image':
+						arrayMsg.push({
+							key:childItem.key,
+							date:childItem.val().date,
+							msgType:'image',
+							imgSource:childItem.val().imgSource,
+							uid:childItem.val().uid
+						});
+						break;
+				}
+
+
 			});
 
 			dispatch({

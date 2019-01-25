@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, ImageBackground, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, FlatList, ActivityIndicator } from 'react-native';
 import { connect } from 'react-redux';
 import { getChatList, setActiveChat } from '../actions/ChatActions';
 import ConversasItem from '../components/ConversasList/ConversasItem';
@@ -13,11 +13,15 @@ export class ConversasList extends Component {
 
 	constructor(props) {
 		super(props);
-		this.state = {};
+		this.state = {
+			loading:true
+		};
 
 		this.conversasClick = this.conversasClick.bind(this);
 
-		this.props.getChatList( this.props.uid );
+		this.props.getChatList( this.props.uid, ()=>{
+			this.setState({loading:false});
+		});
 	}
 
 	componentDidUpdate() {
@@ -34,8 +38,9 @@ export class ConversasList extends Component {
 
 	render() {
 		return (
-			<ImageBackground opacity={0.1} source={require('../assets/images/fundo.jpg')} style={styles.bg} >
+			<ImageBackground opacity={0.5} source={require('../assets/images/fundo.jpg')} style={styles.bg} >
 				<View style={styles.container}>
+					{this.state.loading && <ActivityIndicator size="large" />}
 					<FlatList 
 					data={this.props.chats}
 					renderItem={({item})=> <ConversasItem data={item} onPress={this.conversasClick} /> }

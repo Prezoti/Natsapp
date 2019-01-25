@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet, ImageBackground, StatusBar, TextInput, TouchableHighlight, Keyboard } from 'react-native';
 import { connect } from 'react-redux';
+import LoadingItem from '../components/LoadingItem';
 import { checkLogin, changeEmail, changePassword, changeName, SignUpAction } from '../actions/AuthActions';
 
 export class SignUp extends Component {
@@ -11,7 +12,9 @@ export class SignUp extends Component {
 
 	constructor(props) {
 		super(props);
-		this.state = {};
+		this.state = {
+			loading:false
+		};
 	}
 
 	componentDidUpdate() {
@@ -39,12 +42,18 @@ export class SignUp extends Component {
 
 						<View style={styles.buttonArea}>
 							<TouchableHighlight underlayColor='#CCCCCC' style={styles.button} onPress={()=>{
-								this.props.SignUpAction(this.props.name, this.props.email, this.props.password)
+								this.setState({loading:true});
+								this.props.SignUpAction(this.props.name, this.props.email, this.props.password, ()=>{
+									this.setState({loading:false});
+								});
 							}}>
 								<Text style={styles.btnTxext}>Cadastrar</Text>
 							</TouchableHighlight>
 						</View>											
 					</View>
+
+					<LoadingItem visible={this.state.loading} />
+					
 				</View>
 			</ImageBackground>
 		);

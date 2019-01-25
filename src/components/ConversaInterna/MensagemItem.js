@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { TouchableHighlight, View, Text, StyleSheet, Image } from 'react-native';
 
 export default class MensagemItem extends Component {
 
 	constructor(props) {
 		super(props);
 
-		let bgColor = '#EEE999';
+		let bgColor = '#DDDDDD';
 		let align = 'flex-start';
 		let txtAlign = 'left';
 
@@ -23,6 +23,12 @@ export default class MensagemItem extends Component {
 			txtAlign:txtAlign,
 			dateMsg:this.getFormatedDate(this.props.data.date)
 		};
+
+		this.imageClicked = this.imageClicked.bind(this);
+	}
+
+	imageClicked() {
+		this.props.onImagePress(this.props.data.imgSource);
 	}
 
 	getFormatedDate(originalDate) {
@@ -48,8 +54,17 @@ export default class MensagemItem extends Component {
 	render() {
 		return(
 			<View style={[MsgStyles.area, {alignSelf:this.state.align, backgroundColor:this.state.bgColor}]} >
-				<Text style={{textAlign:this.state.txtAlign}}>{this.props.data.m}</Text>
+
+				{this.props.data.msgType == 'text' &&
+					<Text style={{textAlign:this.state.txtAlign, color:'#000000'}}>{this.props.data.m}</Text>
+				}
+				{this.props.data.msgType == 'image' &&
+					<TouchableHighlight onPress={this.imageClicked} >
+						<Image resizeMethod="resize" style={MsgStyles.image} source={{uri:this.props.data.imgSource}} />
+					</TouchableHighlight>
+				}
 				<Text style={MsgStyles.dateTxt}>{this.state.dateMsg}</Text>
+				
 			</View>
 		);
 	}
@@ -70,5 +85,9 @@ const MsgStyles = StyleSheet.create({
 	dateTxt:{
 		fontSize:10,
 		textAlign:'right'
+	},
+	image:{
+		width:180,
+		height:120
 	}
 });
